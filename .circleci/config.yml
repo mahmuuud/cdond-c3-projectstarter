@@ -1,5 +1,6 @@
 version: 2.1
-
+orbs:
+  slack: circleci/slack@4.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -16,7 +17,7 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here     
+      # Add parameter here   
     steps:
       - run:
           name: Revert migrations
@@ -31,6 +32,13 @@ commands:
             #  Add revert code here. You can find this in the Getting Started section.
               exit 1
             fi
+
+  send-slack-fail:
+    description: Send a slack notification in case of failure
+    steps:
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
             
 jobs:
   build-frontend:
@@ -47,6 +55,7 @@ jobs:
             cd frontend
             npm i
             npm run build
+      - send-slack-fail
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -65,6 +74,7 @@ jobs:
             cd backend
             npm i
             npm run build
+      - send-slack-fail
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -84,6 +94,7 @@ jobs:
             cd frontend
             npm i
             npm run test
+      - send-slack-fail
                 
   test-backend:
     docker:
@@ -100,6 +111,7 @@ jobs:
             cd backend
             npm i
             npm run test
+      - send-slack-fail
             
   scan-frontend:
     docker:
@@ -115,6 +127,7 @@ jobs:
             cd frontend
             npm i
             npm audit --audit-level=critical
+      - send-slack-fail
      
 
   scan-backend:
@@ -131,6 +144,7 @@ jobs:
             cd backend
             npm i
             npm audit --audit-level=critical
+      - send-slack-fail
 
 #   deploy-infrastructure:
 #     docker:
@@ -304,6 +318,7 @@ jobs:
 #             then
 #               # your code here
 #             fi
+
             
 
 workflows:
