@@ -25,6 +25,7 @@
         upgrade: yes
 
     - name: "install dependencies"
+      become: yes
       apt:
         name: ["nodejs", "npm", "build-essential", "python3.8"]
         state: latest

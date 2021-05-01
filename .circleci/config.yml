@@ -283,17 +283,17 @@ jobs:
       # - destroy-environment:
       #     stack: "backend"   
 
-  rollback:
-    docker:
-      - image: amazon/awscli
-    steps:
-      - run: yum install -y curl
-      - run: yum install -y nodejs
-      - revert-migrations
-      - destroy-environment:
-          stack: "frontend" 
-      - destroy-environment:
-          stack: "backend"          
+  # rollback:
+  #   docker:
+  #     - image: amazon/awscli
+  #   steps:
+  #     - run: yum install -y curl
+  #     - run: yum install -y nodejs
+  #     - revert-migrations
+  #     - destroy-environment:
+  #         stack: "frontend" 
+  #     - destroy-environment:
+  #         stack: "backend"          
                     
 #   deploy-backend:
 #     docker:
