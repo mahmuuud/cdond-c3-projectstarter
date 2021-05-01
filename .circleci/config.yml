@@ -399,8 +399,8 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      - rollback:
-          requires: [deploy-infrastructure]
+      # - rollback:
+      #     requires: [deploy-infrastructure]
       # - deploy-backend:
       #     requires: [run-migrations]
       # - smoke-test:
