@@ -400,7 +400,6 @@ workflows:
       - deploy-frontend:
           requires: [run-migrations]
       - rollback:
-          when: on_fail
           requires: [deploy-infrastructure]
       # - deploy-backend:
       #     requires: [run-migrations]
