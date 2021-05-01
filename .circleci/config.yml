@@ -276,12 +276,24 @@ jobs:
             cd dist
             aws s3 sync . s3://"udapeople-${CIRCLE_WORKFLOW_ID}" --delete
       # Here's where you will add some code to rollback on failure
-      - revert-migrations
+      # - revert-migrations
       - send-slack-fail
+      # - destroy-environment:
+      #     stack: "frontend" 
+      # - destroy-environment:
+      #     stack: "backend"   
+
+  rollback:
+    docker:
+      - image: amazon/awscli
+    steps:
+      - run: yum install -y curl
+      - run: yum install -y nodejs
+      - revert-migrations
       - destroy-environment:
           stack: "frontend" 
       - destroy-environment:
-          stack: "backend"      
+          stack: "backend"          
                     
 #   deploy-backend:
 #     docker:
@@ -387,6 +399,9 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
+      - rollback:
+          when: on_fail
+          requires: [deploy-infrastructure]
       # - deploy-backend:
       #     requires: [run-migrations]
       # - smoke-test:
