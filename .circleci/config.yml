@@ -276,6 +276,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
+            yum install -y nodejs
             cd frontend
             npm i
       - run:
@@ -294,12 +295,12 @@ jobs:
             cd dist
             aws s3 sync . s3://"udapeople-${CIRCLE_WORKFLOW_ID}" --delete
       # Here's where you will add some code to rollback on failure
-      # - revert-migrations
+      - revert-migrations
       - send-slack-fail
-      # - destroy-environment:
-      #     stack: "frontend" 
-      # - destroy-environment:
-      #     stack: "backend"   
+      - destroy-environment:
+          stack: "frontend" 
+      - destroy-environment:
+          stack: "backend"   
 
   # rollback:
   #   docker:
