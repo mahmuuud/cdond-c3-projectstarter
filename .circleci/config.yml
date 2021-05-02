@@ -259,9 +259,8 @@ jobs:
               echo "migration success"
               curl -H "Content-Type: text/plain" -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request PUT --data "success" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
             else
-              echo "migration failure"
-              curl -H "Content-Type: text/plain" -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request PUT --data "failure" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
-              exit 1
+              echo "no migrations are pending"
+              curl -H "Content-Type: text/plain" -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request PUT --data "no-migrations" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
             fi      
      # Here's where you will add some code to rollback on failure
       - revert-migrations
