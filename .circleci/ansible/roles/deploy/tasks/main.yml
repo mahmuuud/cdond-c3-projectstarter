@@ -7,6 +7,6 @@
 - name: copy backend files
   become: yes
   copy:
-    src: /web
+    src: web
     dest: ~/web
     backup: yes
