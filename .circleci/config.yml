@@ -349,6 +349,7 @@ jobs:
             apk add --update npm
             npm install typescript -g 
       - run:
+          no_output_timeout: 60m
           name: Deploy backend
           command: |
             # your code here
