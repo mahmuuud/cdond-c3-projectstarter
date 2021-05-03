@@ -223,17 +223,17 @@ jobs:
     docker:
       # Docker image here that supports NodeJS
       - image: circleci/node:13.8.0
-    # environment:
-    #   TYPEORM_MIGRATIONS_DIR: $TYPEORM_MIGRATIONS_DIR
-    #   ENVIRONMENT: $ENVIRONMENT
-    #   TYPEORM_CONNECTION: $TYPEORM_CONNECTION
-    #   TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS 
-    #   TYPEORM_HOST: $TYPEORM_HOST
-    #   TYPEORM_PORT: $TYPEORM_PORT
-    #   TYPEORM_USERNAME: $TYPEORM_USERNAME
-    #   TYPEORM_PASSWORD: $TYPEORM_PASSWORD
-    #   TYPEORM_DATABASE: $TYPEORM_DATABASE
-    #   TYPEORM_ENTITIES: $TYPEORM_ENTITIES
+    environment:
+      TYPEORM_MIGRATIONS_DIR: $TYPEORM_MIGRATIONS_DIR
+      ENVIRONMENT: $ENVIRONMENT
+      TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+      TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS 
+      TYPEORM_HOST: $TYPEORM_HOST
+      TYPEORM_PORT: $TYPEORM_PORT
+      TYPEORM_USERNAME: $TYPEORM_USERNAME
+      TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+      TYPEORM_DATABASE: $TYPEORM_DATABASE
+      TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
       - restore_cache:
@@ -347,15 +347,34 @@ jobs:
             apk add curl
             apk add --upgrade rsync
             apk add --update npm
+            apk add tar
+            apk add gzip
             npm install typescript -g 
       - run:
-          no_output_timeout: 60m
+          name: create env file
+          command: |
+            cd backend
+            echo ENVIRONMENT=$ENVIRONMENT > .env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR > .env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> .env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> .env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> .env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> .env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> .env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> .env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
+            cat .env
+
+      - run:
+          no_output_timeout: 160m
           name: Deploy backend
           command: |
             # your code here
             cd backend
             npm i
             npm run build
+            tar --exclude='./node_modules' -zcvf backend.tar.gz .
             # rsync -a dist/ ../.circleci/ansible/roles/deploy/files/web
             ansible-playbook -i ../.circleci/ansible/inventory.txt ../.circleci/ansible/deploy-backend.yml
 
