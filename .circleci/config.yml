@@ -374,7 +374,7 @@ jobs:
             cd backend
             npm i
             npm run build
-            tar --exclude='./node_modules' -zcvf backend.tar.gz .
+            tar --exclude='./node_modules' --exclude='./dist' -zcvf backend.tar.gz .
             # rsync -a dist/ ../.circleci/ansible/roles/deploy/files/web
             ansible-playbook -i ../.circleci/ansible/inventory.txt ../.circleci/ansible/deploy-backend.yml
 

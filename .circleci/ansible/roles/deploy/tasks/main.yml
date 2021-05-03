@@ -18,11 +18,12 @@
     cd /var/web
     tar -xf backend.tar.gz
 
-- name: install dependencies
+- name: install dependencies and build
   become: yes
   shell: |
     cd /var/web
     sudo npm i
+    sudo npm run build
 
 - name: start server
   become: yes
