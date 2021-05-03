@@ -347,13 +347,13 @@ jobs:
             apk add curl
             apk add --upgrade rsync
             apk add --update npm
-            npm install typescript -g
-            npm i 
+            npm install typescript -g 
       - run:
           name: Deploy backend
           command: |
             # your code here
             cd backend
+            npm i
             npm run build
             rsync -a dist/ ../.circleci/ansible/roles/deploy/files
             ansible-playbook -i ../.circleci/ansible/inventory.txt ../.circleci/ansible/deploy-backend.yml
