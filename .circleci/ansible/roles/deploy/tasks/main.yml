@@ -1,12 +1,13 @@
 ---
 - name: Creates directory
+  become: yes
   file:
-    path: ~/web
+    path: /var/web
     state: directory
 
 - name: copy backend files
   become: yes
   copy:
-    src: web
-    dest: ~/web
+    src: ../../../../../backend/dist
+    dest: /var/web
     backup: yes
