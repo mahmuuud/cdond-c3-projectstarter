@@ -276,7 +276,10 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
+            yum update
+            yum install -y epel-release
             yum install -y nodejs
+            yum install npm
             cd frontend
             npm i
       - run:
