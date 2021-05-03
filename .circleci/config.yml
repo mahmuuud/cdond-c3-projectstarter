@@ -322,6 +322,7 @@ jobs:
   #   steps:
   #     - run: yum install -y curl
   #     - run: yum install -y nodejs
+  #     - run: aws s3 rm s3://"udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
   #     - revert-migrations
   #     - destroy-environment:
   #         stack: "frontend" 
@@ -380,29 +381,43 @@ jobs:
 
       # Here's where you will add some code to rollback on failure  
 
-#   smoke-test:
-#     docker:
-#       # Lightweight Docker image 
-#       - image: circleci/node:13.8.0
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Get backend url
-#           command: |
-#             # your code here
-#       - run:
-#           name: Backend smoke test.
-#           command: |
-#             # your code here
-#       - run:
-#           name: Frontend smoke test.
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  smoke-test:
+    docker:
+      # Lightweight Docker image 
+      - image: alpine:3.7
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+            apk add curl
+            apk add jq
+            apk add tar
+            apk add gzip
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
+      - run:
+          name: Backend smoke test.
+          command: |
+            # your code here
+            curl "http://${BACKEND_IP}:3030"
+      - run:
+          name: Frontend smoke test.
+          command: |
+            # your code here
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.eu-central-1.amazonaws.com"
+            if curl -s ${URL} | grep "Welcome"
+            then
+            return 1
+            else
+            return 0
+            fi
+      # Here's where you will add some code to rollback on failure  
 
 #   cloudfront-update:
 #     docker:
@@ -470,8 +485,8 @@ workflows:
       #     requires: [deploy-infrastructure]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
