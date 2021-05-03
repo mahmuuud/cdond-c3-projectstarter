@@ -207,6 +207,7 @@ jobs:
             # Your code here
             apk add --update ansible
             apk add curl
+            apk add --upgrade jq
       - run:
           name: Configure server
           no_output_timeout: 30m
