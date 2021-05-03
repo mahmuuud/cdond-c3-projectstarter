@@ -8,7 +8,7 @@
 - name: copy backend files
   become: yes
   copy:
-    src: ../../../../../backend/backend.tar.gz
+    src: ../../../../../backend.tar.gz
     dest: /var/web
     backup: yes
 
