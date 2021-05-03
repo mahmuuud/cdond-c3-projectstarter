@@ -347,6 +347,7 @@ jobs:
             apk add curl
             apk add --upgrade rsync
             apk add --update npm
+            npm install typescript -g
             npm i 
       - run:
           name: Deploy backend
