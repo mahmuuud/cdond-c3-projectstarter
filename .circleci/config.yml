@@ -276,10 +276,14 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            yum update
-            yum install -y epel-release
-            yum install -y nodejs
-            yum install npm
+            # yum update
+            # yum install -y epel-release
+            # yum install -y nodejs
+            # yum install npm
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+            . ~/.nvm/nvm.sh
+            nvm install node
+            node -v
             cd frontend
             npm i
       - run:
