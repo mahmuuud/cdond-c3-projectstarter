@@ -466,43 +466,43 @@ jobs:
       - destroy-environment:
           stack: "backend" 
 
-cleanup:
-    docker:
-      # Docker image here
-      - image: amazon/aws-cli
-    steps:
-      # Checkout code from git
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-            yum install -y tar
-            yum install -y gzip
-            yum install -y jq
-            curl -sL https://rpm.nodesource.com/setup_14.x | bash -
-            yum install -y nodejs
-      - run:
-          name: Get old stack workflow id
-          command: |
-            # your code here
-            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
-            export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
-      - run:
-          name: Remove old stacks and files
-          command: |
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-            then
-              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
-            fi
-      - revert-migrations
-      - send-slack-fail
-      - destroy-environment:
-          stack: "frontend" 
-      - destroy-environment:
-          stack: "backend"
+  cleanup:
+      docker:
+        # Docker image here
+        - image: amazon/aws-cli
+      steps:
+        # Checkout code from git
+        - checkout
+        - run:
+            name: Install dependencies
+            command: |
+              # your code here
+              yum install -y tar
+              yum install -y gzip
+              yum install -y jq
+              curl -sL https://rpm.nodesource.com/setup_14.x | bash -
+              yum install -y nodejs
+        - run:
+            name: Get old stack workflow id
+            command: |
+              # your code here
+              export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
+              export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
+        - run:
+            name: Remove old stacks and files
+            command: |
+              if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+              then
+                aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
+                aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+                aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+              fi
+        - revert-migrations
+        - send-slack-fail
+        - destroy-environment:
+            stack: "frontend" 
+        - destroy-environment:
+            stack: "backend"
 
             
 
