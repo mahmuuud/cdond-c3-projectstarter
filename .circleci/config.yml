@@ -400,11 +400,14 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-            BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
+            # BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
+            # echo $BACKEND_IP
       - run:
           name: Backend smoke test.
           command: |
             # your code here
+            BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
+            echo $BACKEND_IP
             curl "http://${BACKEND_IP}:3030"
       - run:
           name: Frontend smoke test.
