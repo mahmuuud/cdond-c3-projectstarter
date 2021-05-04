@@ -13,6 +13,10 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
+            if(<<parameters.stack>>=="frontend");
+            then
+              aws s3 rm s3://"udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
+            fi
             aws cloudformation delete-stack --stack-name <<parameters.stack>>-${CIRCLE_WORKFLOW_ID} 
 
   revert-migrations:
@@ -179,12 +183,13 @@ jobs:
             cat .circleci/ansible/inventory.txt
             echo "$URL"
             curl -H "Content-Type: text/plain" -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request PUT --data "${URL}" https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID}
-      - send-slack-fail
+     
       - persist_to_workspace:
           root: .
           paths:
             - .circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
+      - send-slack-fail
       - destroy-environment:
           stack: "frontend" 
       - destroy-environment:
@@ -208,6 +213,7 @@ jobs:
             apk add --update ansible
             apk add curl
             apk add --upgrade jq
+            pip3 install awscli
       - run:
           name: Configure server
           no_output_timeout: 30m
@@ -216,7 +222,10 @@ jobs:
             cat .circleci/ansible/inventory.txt
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml 
       - send-slack-fail 
-      # Here's where you will add some code to rollback on failure 
+      - destroy-environment:
+          stack: "frontend" 
+      - destroy-environment:
+          stack: "backend"  
        
 
   run-migrations:
@@ -276,6 +285,10 @@ jobs:
             fi      
      # Here's where you will add some code to rollback on failure
       - revert-migrations
+      # - destroy-environment:
+      #     stack: "frontend" 
+      # - destroy-environment:
+      #     stack: "backend" 
          
 
   deploy-frontend:
@@ -289,6 +302,8 @@ jobs:
           command: |
             # your code here
             yum install -y tar
+            yum install -y gzip
+            yum install -y jq
             curl -sL https://rpm.nodesource.com/setup_14.x | bash -
             yum install -y nodejs
             cd frontend
@@ -314,20 +329,7 @@ jobs:
       - destroy-environment:
           stack: "frontend" 
       - destroy-environment:
-          stack: "backend"   
-
-  # rollback:
-  #   docker:
-  #     - image: amazon/aws-cli
-  #   steps:
-  #     - run: yum install -y curl
-  #     - run: yum install -y nodejs
-  #     - run: aws s3 rm s3://"udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
-  #     - revert-migrations
-  #     - destroy-environment:
-  #         stack: "frontend" 
-  #     - destroy-environment:
-  #         stack: "backend"          
+          stack: "backend"           
                     
   deploy-backend:
     docker:
@@ -344,12 +346,14 @@ jobs:
           name: Install dependencies
           command: |
             # Your code here
+            pip3 install awscli
             apk add --update ansible
             apk add curl
             apk add --upgrade rsync
             apk add --update npm
             apk add tar
             apk add gzip
+            apk add jq
             npm install typescript -g 
       - run:
           name: create env file
@@ -379,12 +383,18 @@ jobs:
             # rsync -a dist/ ../.circleci/ansible/roles/deploy/files/web
             ansible-playbook -i ../.circleci/ansible/inventory.txt ../.circleci/ansible/deploy-backend.yml
 
-      # Here's where you will add some code to rollback on failure  
+      # Here's where you will add some code to rollback on failure 
+      - revert-migrations
+      - send-slack-fail
+      - destroy-environment:
+          stack: "frontend" 
+      - destroy-environment:
+          stack: "backend"  
 
   smoke-test:
     docker:
       # Lightweight Docker image 
-      - image: alpine:3.7
+      - image: python:3.7-alpine3.11
     steps:
       # Checkout code from git
       - checkout
@@ -392,16 +402,12 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
+            apk add --update npm
             apk add curl
             apk add jq
             apk add tar
             apk add gzip
-      - run:
-          name: Get backend url
-          command: |
-            # your code here
-            # BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
-            # echo $BACKEND_IP
+            pip3 install awscli
       - run:
           name: Backend smoke test.
           command: |
@@ -420,7 +426,13 @@ jobs:
             else
             return 0
             fi
-      # Here's where you will add some code to rollback on failure  
+      # Here's where you will add some code to rollback on failure 
+      - revert-migrations
+      - send-slack-fail
+      - destroy-environment:
+          stack: "frontend" 
+      - destroy-environment:
+          stack: "backend" 
 
 #   cloudfront-update:
 #     docker:
