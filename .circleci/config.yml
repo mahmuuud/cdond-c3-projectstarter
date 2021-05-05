@@ -492,14 +492,26 @@ jobs:
         - run:
             name: Remove old stacks and files
             command: |
-              export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
-              export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
-              if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-              then
-                aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
-                aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-                aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
-              fi
+              OldWorkflowID=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/old-workflow-id)
+              echo ${OldWorkflowID}
+              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+        - run:
+            name: Roll back cloud front
+            when: on_fail
+            command: | 
+              oldCloudFront=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/old-workflow-id)
+              aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --tags project=udapeople \
+              --stack-name "udapeople" \
+              --parameter-overrides WorkflowID="${oldCloudFront}"
+        - run:
+            name: set old workflow ID
+            when: on_success
+            command: |
+              curl -H "Content-Type: text/plain" -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request PUT --data "${CIRCLE_WORKFLOW_ID}" https://api.memstash.io/values/old-workflow-id
         - revert-migrations
         - send-slack-fail
         - destroy-environment:
