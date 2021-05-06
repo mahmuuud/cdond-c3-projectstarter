@@ -312,15 +312,17 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-            BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            # BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
+            # export API_URL="http://${BACKEND_IP}:3030"
+            # echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
             # your code here
-            cd frontend
+            BACKEND_IP=$(curl -H "token: ba893121-109f-4cad-ad93-13a7b46c4149" --request GET https://api.memstash.io/values/backend_${CIRCLE_WORKFLOW_ID})
+            export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
+            cd frontend
             npm run build
             cd dist
             aws s3 sync . s3://"udapeople-${CIRCLE_WORKFLOW_ID}" --delete
